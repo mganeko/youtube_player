@@ -18,6 +18,16 @@
             margin-top: 10px;
         }
     </style>
+    <!---
+        ToDo
+            - [x] Start Playback
+            - [x] Stop (clear Timeout)
+            - [x] Next
+            - [ ] Back
+            - [x] title, artist in segment data
+            - [ ] list
+            - [ ] use seekTime to go next (DO NOT use timeout)
+    -->
 </head>
 <body>
     <h1>YouTube Playback App</h1>
@@ -26,6 +36,9 @@
     </div>
     <button id="start-playback">Start Playback</button>
     <button id="go-next">Next</button>
+    <button id="stop-playback">Stop</button>
+    <br />
+    <div id="current-segment-info"></div>
 
     <script>
         let player;
@@ -35,20 +48,20 @@
         //     { startTime: 50, duration: 8 },
         // ];
         let playbackData = [
-             { startTime: 152, duration: 304 - 152 }, // Drop B 開始時間: xx秒、再生時間: x秒
-             { startTime: 325, duration: 477 - 325 }, // Drop A
+             { startTime: 152, endTime: 304, title: 'Drop', artist:'Team B', duration: 304 - 152 }, // Drop B 開始時間: xx秒、再生時間: x秒
+             { startTime: 325, endTime: 477, title: 'Drop', artist:'Team A', duration: 477 - 325 }, // Drop A
 
-             { startTime: 735, duration: 1003 - 735 }, // Pain is Beauty, MOMOKA
-             { startTime: 1157, duration: 1371 - 1157 }, // 花火, MAHINA
-             { startTime: 1511, duration: 1731 - 1511 }, // TO HATERS, KOKONA
-             { startTime: 1876, duration: 2074 - 1876 }, // 美人, CHIKA
-             { startTime: 2208, duration: 2479 - 2208 }, // In The Flames, FUMINO
+             { startTime: 735, endTime: 1003, title: 'Pain is Beauty', artist:'MOMOKA', duration: 1003 - 735 }, // Pain is Beauty, MOMOKA
+             { startTime: 1157, endTime: 1371, title: '花火', artist:'MAHINA', duration: 1371 - 1157 }, // 花火, MAHINA
+             { startTime: 1511, endTime: 1731, title: 'TO HATERS', artist:'KOKONA', duration: 1731 - 1511 }, // TO HATERS, KOKONA
+             { startTime: 1876, endTime: 2074, title: '美人', artist:'CHIKA', duration: 2074 - 1876 }, // 美人, CHIKA
+             { startTime: 2208, endTime: 2479, title: 'In The Flames', artist:'FUMINO', duration: 2479 - 2208 }, // In The Flames, FUMINO
 
-             { startTime: 2888, duration: 3101 - 2888 }, // ディスタンス, KOHARU
-             { startTime: 3296, duration: 3601 - 3296 }, // ダリア, KOKO
-             { startTime: 3825, duration: 4038 - 3825 }, // I'm NOT OK, JISOO
-             { startTime: 4173, duration: 4418 - 4173 }, // ^_^, NAOKO
-             { startTime: 4605, duration: 4886 - 4605 }, // ハレンチ, YURI
+             { startTime: 2888, endTime: 3101, title: 'ディスタンス', artist:'KOHARU', duration: 3101 - 2888 }, // ディスタンス, KOHARU
+             { startTime: 3296, endTime: 3601, title: 'ダリア', artist:'KOKO', duration: 3601 - 3296 }, // ダリア, KOKO
+             { startTime: 3825, endTime: 4038, title: 'I\'m NOT OK', artist:'JISOO', duration: 4038 - 3825 }, // I'm NOT OK, JISOO
+             { startTime: 4173, endTime: 4418, title: '^_^', artist:'NAOKO', duration: 4418 - 4173 }, // ^_^, NAOKO
+             { startTime: 4605, endTime: 4886, title: 'ハレンチ', artist:'YURI', duration: 4886 - 4605 }, // ハレンチ, YURI
          ];
         let videoId = "hqrdKtyJuss"; // "dQw4w9WgXcQ"; // YouTube動画ID（ここを指定のURLから取得してください）
         let currentIndex = 0;
@@ -68,12 +81,26 @@
         function onPlayerReady() {
             document.getElementById("start-playback").addEventListener("click", startPlayback);
             document.getElementById("go-next").addEventListener("click", playNextSegment);
+            document.getElementById("stop-playback").addEventListener("click", stopPlayback);
+        }
+
+        function showCurrentSegmentInfo() {
+            let segment = playbackData[currentIndex];
+            document.getElementById("current-segment-info").innerText = `Segment ${currentIndex + 1} / ${playbackData.length}: (${segment.title} , ${segment.artist})`;
         }
 
         function startPlayback() {
             if (playbackData.length === 0) return;
             currentIndex = 0;
             playNextSegment();
+        }
+
+        function stopPlayback() {
+            if (timerId) {
+                clearTimeout(timerId);
+                timerId = null;
+            }
+            player.pauseVideo();
         }
 
         function playNextSegment() {
@@ -88,16 +115,19 @@
                 return;
             }
 
+            console.log(`Playing segment ${currentIndex + 1} / ${playbackData.length}`);
             let segment = playbackData[currentIndex];
             player.seekTo(segment.startTime);
             player.playVideo();
+            showCurrentSegmentInfo();
+            const duration = segment.endTime - segment.startTime;
 
             timerId = setTimeout(() => {
                 timerId = null;
                 player.pauseVideo();
                 currentIndex++;
                 playNextSegment();
-            }, segment.duration * 1000);
+            }, duration * 1000);
         }
     </script>
 </body>
