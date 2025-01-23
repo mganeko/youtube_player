@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Playback App</title>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #player-container {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>YouTube Playback App</h1>
+    <div id="player-container">
+        <div id="player"></div>
+    </div>
+    <button id="start-playback">Start Playback</button>
+    <button id="go-next">Next</button>
+
+    <script>
+        let player;
+        // let playbackData = [
+        //     { startTime: 10, duration: 5 }, // 開始時間: 10秒、再生時間: 5秒
+        //     { startTime: 30, duration: 10 },
+        //     { startTime: 50, duration: 8 },
+        // ];
+        let playbackData = [
+             { startTime: 152, duration: 304 - 152 }, // Drop B 開始時間: xx秒、再生時間: x秒
+             { startTime: 325, duration: 477 - 325 }, // Drop A
+
+             { startTime: 735, duration: 1003 - 735 }, // Pain is Beauty, MOMOKA
+             { startTime: 1157, duration: 1371 - 1157 }, // 花火, MAHINA
+             { startTime: 1511, duration: 1731 - 1511 }, // TO HATERS, KOKONA
+             { startTime: 1876, duration: 2074 - 1876 }, // 美人, CHIKA
+             { startTime: 2208, duration: 2479 - 2208 }, // In The Flames, FUMINO
+
+             { startTime: 2888, duration: 3101 - 2888 }, // ディスタンス, KOHARU
+             { startTime: 3296, duration: 3601 - 3296 }, // ダリア, KOKO
+             { startTime: 3825, duration: 4038 - 3825 }, // I'm NOT OK, JISOO
+             { startTime: 4173, duration: 4418 - 4173 }, // ^_^, NAOKO
+             { startTime: 4605, duration: 4886 - 4605 }, // ハレンチ, YURI
+         ];
+        let videoId = "hqrdKtyJuss"; // "dQw4w9WgXcQ"; // YouTube動画ID（ここを指定のURLから取得してください）
+        let currentIndex = 0;
+        let timerId = null;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '360',
+                width: '640',
+                videoId: videoId,
+                events: {
+                    onReady: onPlayerReady,
+                },
+            });
+        }
+
+        function onPlayerReady() {
+            document.getElementById("start-playback").addEventListener("click", startPlayback);
+            document.getElementById("go-next").addEventListener("click", playNextSegment);
+        }
+
+        function startPlayback() {
+            if (playbackData.length === 0) return;
+            currentIndex = 0;
+            playNextSegment();
+        }
+
+        function playNextSegment() {
+            if (timerId) {
+                clearTimeout(timerId);
+                timerId = null;
+                currentIndex++;
+                player.pauseVideo();
+            }
+            if (currentIndex >= playbackData.length) {
+                console.log("Playback finished.");
+                return;
+            }
+
+            let segment = playbackData[currentIndex];
+            player.seekTo(segment.startTime);
+            player.playVideo();
+
+            timerId = setTimeout(() => {
+                timerId = null;
+                player.pauseVideo();
+                currentIndex++;
+                playNextSegment();
+            }, segment.duration * 1000);
+        }
+    </script>
+</body>
+</html>
