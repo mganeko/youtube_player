@@ -28,11 +28,11 @@
             - [x] Start Playback
             - [x] Stop (clear Timeout)
             - [x] Next
-            - [ ] Back
+            - [x] Back
             - [x] title, artist in segment data
             - [x] grid layout
             - [ ] list
-            - [ ] use seekTime to go next (DO NOT use timeout)
+            - [x] use getCurerntTime() to check going next
             - [ ] load segment data from json file
     -->
 </head>
@@ -41,8 +41,10 @@
     <div class="grid-container">
         <div id="control-pannel">
             <button id="start-playback">Start Playback</button>
-            <button id="go-next">Next</button>
             <button id="stop-playback">Stop</button>
+            <br />
+            <button id="go-back">Back</button>
+            <button id="go-next">Next</button>
             <div id="current-segment-info"></div>
         </div>
         <div id="player-container">
@@ -83,7 +85,7 @@
              { startTime: 4605, endTime: 4886, title: 'ハレンチ', artist:'YURI', duration: 4886 - 4605 }, // ハレンチ, YURI
          ];
         let videoId = "hqrdKtyJuss"; // "dQw4w9WgXcQ"; // YouTube動画ID（ここを指定のURLから取得してください）
-        let currentIndex = 0;
+        let currentIndex = -1;
         let timerId = null;
 
         function onYouTubeIframeAPIReady() {
@@ -97,6 +99,9 @@
                 },
                 playerVars: {
                     rel: 0, // 再生終了後に関連動画を表示するかどうか設定
+                            // 2018年の変更後は、関連動画を無効にできなくなります。
+                            // 代わりに、rel パラメータを 0 に設定すると、
+                            // 再生した動画と同じチャンネルから関連動画が選択されます
                     autoplay: 0 // 自動再生するかどうか設定
                 },
             });
@@ -105,6 +110,7 @@
         function onPlayerReady(event) {
             document.getElementById("start-playback").addEventListener("click", startPlayback);
             document.getElementById("go-next").addEventListener("click", playNextSegment);
+            document.getElementById("go-back").addEventListener("click", playPrevSegment);
             document.getElementById("stop-playback").addEventListener("click", stopPlayback);
             player.addEventListener("timeupdate", checkSeekNext);
 
@@ -151,24 +157,14 @@
         }
 
         function checkSeekNext() {
-            console.log("timeupdate, checkSeekNext");
             const currentTime = player.getCurrentTime(); // 再生位置（秒単位）
-            console.log('checkSeekNext() currentTime', currentTime);
+            //console.log('checkSeekNext() currentTime', currentTime);
             const segment = getCurrentSegment();
             const endTime = segment.endTime;
             if(currentTime <= endTime)
                 return;
 
             playNextSegment();
-
-            // player.pauseVideo();
-            // currentIndex++;
-            // if (currentIndex >= getSegmentCount()) {
-            //     console.log("Playback finished.");
-            //     return;
-            // }
-            // playSegment(currentIndex);
-            // console.log("Go Next Segment");
         }
 
         function getCurrentSegment() {
@@ -206,32 +202,17 @@
             console.log("Go Next Segment");
         }
 
-        // function playNextSegment() {
-        //     if (timerId) {
-        //         clearTimeout(timerId);
-        //         timerId = null;
-        //         currentIndex++;
-        //         player.pauseVideo();
-        //     }
-        //     if (currentIndex >= playbackData.length) {
-        //         console.log("Playback finished.");
-        //         return;
-        //     }
+        function playPrevSegment() {
+            player.pauseVideo();
+            currentIndex--;
+            if (currentIndex < 0) {
+                console.log("Playback finished.");
+                return;
+            }
+            playSegment(currentIndex);
+            console.log("Go Prev Segment");
+        }
 
-        //     console.log(`Playing segment ${currentIndex + 1} / ${playbackData.length}`);
-        //     let segment = playbackData[currentIndex];
-        //     player.seekTo(segment.startTime);
-        //     player.playVideo();
-        //     showCurrentSegmentInfo();
-        //     const duration = segment.endTime - segment.startTime;
-
-        //     timerId = setTimeout(() => {
-        //         timerId = null;
-        //         player.pauseVideo();
-        //         currentIndex++;
-        //         playNextSegment();
-        //     }, duration * 1000);
-        // }
     </script>
 </body>
 </html>
