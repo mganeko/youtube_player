@@ -31,9 +31,10 @@
             - [x] Back
             - [x] title, artist in segment data
             - [x] grid layout
-            - [ ] list
+            - [x] list
+            - [x] show playing segment in list
             - [x] use getCurerntTime() to check going next
-            - [ ] load segment data from json file
+            - [x] load segment data from json file
     -->
 </head>
 <body>
@@ -157,6 +158,13 @@
             }
         }
 
+        function showSelection(index) {
+            const select = document.getElementById('segment-list');
+            if (index >= 0 && index < select.options.length) {
+                select.selectedIndex = index;
+            }
+        }
+
         function selectSegment() {
             const select = document.getElementById('segment-list');
             currentIndex = select.value;
@@ -174,6 +182,7 @@
             currentIndex = 0;
             //playNextSegment();
             playSegment(currentIndex);
+            showSelection(currentIndex);
         }
 
         function stopPlayback() {
@@ -227,6 +236,7 @@
                 return;
             }
             playSegment(currentIndex);
+            showSelection(currentIndex);
             console.log("Go Next Segment");
         }
 
@@ -238,6 +248,7 @@
                 return;
             }
             playSegment(currentIndex);
+            showSelection(currentIndex);
             console.log("Go Prev Segment");
         }
 
