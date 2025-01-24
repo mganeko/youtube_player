@@ -46,6 +46,8 @@
             <button id="go-back">Back</button>
             <button id="go-next">Next</button>
             <div id="current-segment-info"></div>
+            <select id="segment-list" size="15">
+            </select>
         </div>
         <div id="player-container">
             <div id="player"></div>
@@ -112,10 +114,13 @@
             document.getElementById("go-next").addEventListener("click", playNextSegment);
             document.getElementById("go-back").addEventListener("click", playPrevSegment);
             document.getElementById("stop-playback").addEventListener("click", stopPlayback);
-            player.addEventListener("timeupdate", checkSeekNext);
+            //player.addEventListener("timeupdate", checkSeekNext);
 
             //const embedCode = event.target.getVideoEmbedCode();
             //console.log(embedCode);
+
+            showSegmentList();
+            document.getElementById("segment-list").addEventListener("change", selectSegment);
         }
 
         function onPlayerStateChange(event) {
@@ -134,6 +139,26 @@
                     }
                     break;
             }
+        }
+
+        function showSegmentList() {
+            const select = document.getElementById('segment-list');
+            const count = getSegmentCount();
+            for(let i=0; i<count; i++) {
+                const segment = getSegment(i);
+                const str = `${i+1}: ${segment.title} - ${segment.artist}`;
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = str;
+                select.appendChild(option)
+            }
+        }
+
+        function selectSegment() {
+            const select = document.getElementById('segment-list');
+            currentIndex = select.value;
+            console.log("selectSegment(), index:", select.value);
+            playSegment(currentIndex);
         }
 
         function showCurrentSegmentInfo() {
