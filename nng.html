@@ -70,22 +70,19 @@
         //     { startTime: 30, duration: 10 },
         //     { startTime: 50, duration: 8 },
         // ];
-        let playbackData = [
-             { startTime: 152, endTime: 304, title: 'Drop', artist:'Team B', duration: 304 - 152 }, // Drop B 開始時間: xx秒、再生時間: x秒
-             { startTime: 325, endTime: 477, title: 'Drop', artist:'Team A', duration: 477 - 325 }, // Drop A
+        let playbackData = [];
 
-             { startTime: 735, endTime: 1003, title: 'Pain is Beauty', artist:'MOMOKA', duration: 1003 - 735 }, // Pain is Beauty, MOMOKA
-             { startTime: 1157, endTime: 1371, title: '花火', artist:'MAHINA', duration: 1371 - 1157 }, // 花火, MAHINA
-             { startTime: 1511, endTime: 1731, title: 'TO HATERS', artist:'KOKONA', duration: 1731 - 1511 }, // TO HATERS, KOKONA
-             { startTime: 1876, endTime: 2074, title: '美人', artist:'CHIKA', duration: 2074 - 1876 }, // 美人, CHIKA
-             { startTime: 2208, endTime: 2479, title: 'In The Flames', artist:'FUMINO', duration: 2479 - 2208 }, // In The Flames, FUMINO
+        function loadSegmentList() {
+            fetch('segment_list.json')
+                .then(response => response.json())
+                .then(data => {
+                    playbackData = data;
+                    showSegmentList();
+                })
+                .catch(error => console.error('Error loading segment data:', error));
+        }
 
-             { startTime: 2888, endTime: 3101, title: 'ディスタンス', artist:'KOHARU', duration: 3101 - 2888 }, // ディスタンス, KOHARU
-             { startTime: 3296, endTime: 3601, title: 'ダリア', artist:'KOKO', duration: 3601 - 3296 }, // ダリア, KOKO
-             { startTime: 3825, endTime: 4038, title: 'I\'m NOT OK', artist:'JISOO', duration: 4038 - 3825 }, // I'm NOT OK, JISOO
-             { startTime: 4173, endTime: 4418, title: '^_^', artist:'NAOKO', duration: 4418 - 4173 }, // ^_^, NAOKO
-             { startTime: 4605, endTime: 4886, title: 'ハレンチ', artist:'YURI', duration: 4886 - 4605 }, // ハレンチ, YURI
-         ];
+        loadSegmentList();
         let videoId = "hqrdKtyJuss"; // "dQw4w9WgXcQ"; // YouTube動画ID（ここを指定のURLから取得してください）
         let currentIndex = -1;
         let timerId = null;
@@ -119,7 +116,7 @@
             //const embedCode = event.target.getVideoEmbedCode();
             //console.log(embedCode);
 
-            showSegmentList();
+            //showSegmentList();
             document.getElementById("segment-list").addEventListener("change", selectSegment);
         }
 
@@ -141,7 +138,13 @@
             }
         }
 
+        function clearSegmentList() {
+            const select = document.getElementById('segment-list');
+            select.innerHTML = '';
+        }
+
         function showSegmentList() {
+            clearSegmentList();
             const select = document.getElementById('segment-list');
             const count = getSegmentCount();
             for(let i=0; i<count; i++) {
