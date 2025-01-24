@@ -10,6 +10,11 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 20% 80%;
+            gap: 10px;
+        }
         #player-container {
             max-width: 640px;
             margin: 0 auto;
@@ -33,15 +38,25 @@
 </head>
 <body>
     <h1>YouTube Playback App</h1>
-    <div id="player-container">
-        <div id="player"></div>
+    <div class="grid-container">
+        <div id="control-pannel">
+            <button id="start-playback">Start Playback</button>
+            <button id="go-next">Next</button>
+            <button id="stop-playback">Stop</button>
+            <div id="current-segment-info"></div>
+        </div>
+        <div id="player-container">
+            <div id="player"></div>
+        </div>
     </div>
+    <!--
     <div id="control-pannel">
         <button id="start-playback">Start Playback</button>
         <button id="go-next">Next</button>
         <button id="stop-playback">Stop</button>
         <div id="current-segment-info"></div>
     </div>
+    --> 
 
 
     <script>
