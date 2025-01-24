@@ -30,7 +30,7 @@
             - [x] Next
             - [ ] Back
             - [x] title, artist in segment data
-            - [ ] grid layout
+            - [x] grid layout
             - [ ] list
             - [ ] use seekTime to go next (DO NOT use timeout)
             - [ ] load segment data from json file
@@ -93,14 +93,41 @@
                 videoId: videoId,
                 events: {
                     onReady: onPlayerReady,
+                    onStateChange: onPlayerStateChange,
+                },
+                playerVars: {
+                    rel: 0, // 再生終了後に関連動画を表示するかどうか設定
+                    autoplay: 0 // 自動再生するかどうか設定
                 },
             });
         }
 
-        function onPlayerReady() {
+        function onPlayerReady(event) {
             document.getElementById("start-playback").addEventListener("click", startPlayback);
             document.getElementById("go-next").addEventListener("click", playNextSegment);
             document.getElementById("stop-playback").addEventListener("click", stopPlayback);
+            player.addEventListener("timeupdate", checkSeekNext);
+
+            //const embedCode = event.target.getVideoEmbedCode();
+            //console.log(embedCode);
+        }
+
+        function onPlayerStateChange(event) {
+            console.log("onPlayerStateChage(), event.data:", event.data);
+
+            const state = event.data;
+            switch(state) {
+                case 1: // playing
+                    timerId = setInterval(checkSeekNext, 1000);
+                    break;
+                case 0: // finish
+                case 2: // stop
+                    if(timerId) {
+                        clearInterval(timerId);
+                        timerId = null;
+                    }
+                    break;
+            }
         }
 
         function showCurrentSegmentInfo() {
@@ -111,43 +138,100 @@
         function startPlayback() {
             if (playbackData.length === 0) return;
             currentIndex = 0;
-            playNextSegment();
+            //playNextSegment();
+            playSegment(currentIndex);
         }
 
         function stopPlayback() {
             if (timerId) {
-                clearTimeout(timerId);
+                clearInterval(timerId);
                 timerId = null;
             }
             player.pauseVideo();
         }
 
+        function checkSeekNext() {
+            console.log("timeupdate, checkSeekNext");
+            const currentTime = player.getCurrentTime(); // 再生位置（秒単位）
+            console.log('checkSeekNext() currentTime', currentTime);
+            const segment = getCurrentSegment();
+            const endTime = segment.endTime;
+            if(currentTime <= endTime)
+                return;
+
+            playNextSegment();
+
+            // player.pauseVideo();
+            // currentIndex++;
+            // if (currentIndex >= getSegmentCount()) {
+            //     console.log("Playback finished.");
+            //     return;
+            // }
+            // playSegment(currentIndex);
+            // console.log("Go Next Segment");
+        }
+
+        function getCurrentSegment() {
+            const segmentIndex = currentIndex;
+            const segment = getSegment(currentIndex);
+            return segment;
+        }
+
+        function getSegment(index) {
+            return playbackData[index];
+        }
+
+        function getSegmentCount() {
+            return playbackData.length;
+        }
+
+        function playSegment(index) {
+            const segment = getSegment(index);
+            if (!segment)
+                return;
+
+            player.seekTo(segment.startTime);
+            player.playVideo();
+            showCurrentSegmentInfo();     
+        }
+
         function playNextSegment() {
-            if (timerId) {
-                clearTimeout(timerId);
-                timerId = null;
-                currentIndex++;
-                player.pauseVideo();
-            }
-            if (currentIndex >= playbackData.length) {
+            player.pauseVideo();
+            currentIndex++;
+            if (currentIndex >= getSegmentCount()) {
                 console.log("Playback finished.");
                 return;
             }
-
-            console.log(`Playing segment ${currentIndex + 1} / ${playbackData.length}`);
-            let segment = playbackData[currentIndex];
-            player.seekTo(segment.startTime);
-            player.playVideo();
-            showCurrentSegmentInfo();
-            const duration = segment.endTime - segment.startTime;
-
-            timerId = setTimeout(() => {
-                timerId = null;
-                player.pauseVideo();
-                currentIndex++;
-                playNextSegment();
-            }, duration * 1000);
+            playSegment(currentIndex);
+            console.log("Go Next Segment");
         }
+
+        // function playNextSegment() {
+        //     if (timerId) {
+        //         clearTimeout(timerId);
+        //         timerId = null;
+        //         currentIndex++;
+        //         player.pauseVideo();
+        //     }
+        //     if (currentIndex >= playbackData.length) {
+        //         console.log("Playback finished.");
+        //         return;
+        //     }
+
+        //     console.log(`Playing segment ${currentIndex + 1} / ${playbackData.length}`);
+        //     let segment = playbackData[currentIndex];
+        //     player.seekTo(segment.startTime);
+        //     player.playVideo();
+        //     showCurrentSegmentInfo();
+        //     const duration = segment.endTime - segment.startTime;
+
+        //     timerId = setTimeout(() => {
+        //         timerId = null;
+        //         player.pauseVideo();
+        //         currentIndex++;
+        //         playNextSegment();
+        //     }, duration * 1000);
+        // }
     </script>
 </body>
 </html>
